@@ -208,7 +208,7 @@ public class AccountServiceImpl implements AccountService {
     public List<Transaction> getTransactionsByNameCombined(String name) {
         List<Account> accounts =accountRepository.findAll()
                 .stream()
-                .filter(acc -> acc.getAccountHolderName().replaceAll("\\s+","").equalsIgnoreCase(name))
+                .filter(acc -> acc.getAccountHolderName().replaceAll("\\s+","").equalsIgnoreCase(name.replaceAll("\\s+","")))
                 .toList();
         if(accounts.size()<=1){
             throw new RuntimeException("No multiple accounts found for this name: " + name);
@@ -224,16 +224,15 @@ public class AccountServiceImpl implements AccountService {
     public Map<String, List<Transaction>> getTransactionsByNameSeperately(String name) {
         List<Account> accounts = accountRepository.findAll()
                 .stream()
-                .filter( acc -> acc.getAccountHolderName().replaceAll("\\s+","").equalsIgnoreCase(name))
+                .filter( acc -> acc.getAccountHolderName().replaceAll("\\s+","").equalsIgnoreCase(name.replaceAll("\\s+","")))
                 .toList();
         if(accounts.size() <= 1){
             throw  new RuntimeException("No multiple accounts found for this name: "+ name);
         }
         Map<String,List<Transaction>> result = new HashMap<>();
         for(Account account : accounts){
-            List<Transaction> transactions = new ArrayList<>();
-            transactions.addAll(transactionRepository.findByAccountId(account.getId()));
-            result.put(account.getAccountHolderName(),transactions);
+            List<Transaction> transactions = new ArrayList<>(transactionRepository.findByAccountId(account.getId()));
+            result.put(account.getAccountHolderName()+"_"+account.getId(),transactions);
         }
         return  result;
     }
