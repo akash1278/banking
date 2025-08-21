@@ -27,15 +27,6 @@ public interface AccountService {
 
     Map<String, List<Account>> getAllAccountsByName();
 
-    Map<String, List<Account>> multipleAccounts();
 
-    Map<String, List<Account>> singleAccounts();
 
-    Map<String, List<Transaction>> getTransactionsForMultipleAccountsCombined();
-
-    Map<String, Map<Long, List<Transaction>>> getTransactionsForMultipleAccountsSeperately();
-
-    List<Transaction> getTransactionsByNameCombined(String name);
-
-    Map<String, List<Transaction>> getTransactionsByNameSeperately(String name);
 }

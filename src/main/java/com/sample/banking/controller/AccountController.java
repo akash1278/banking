@@ -1,10 +1,12 @@
 package com.sample.banking.controller;
 
 import com.sample.banking.dto.AccountDTO;
+import com.sample.banking.dto.UserDTO;
 import com.sample.banking.entity.Account;
 import com.sample.banking.entity.Transaction;
 import com.sample.banking.service.AccountService;
 import com.sample.banking.service.TransactionService;
+import com.sample.banking.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +19,12 @@ import java.util.Map;
 public class AccountController {
     private final AccountService accountService;
     private final TransactionService transactionService;
+    private final UserService userService;
 
-    public AccountController(AccountService accountService, TransactionService transactionService) {
+    public AccountController(AccountService accountService, TransactionService transactionService, UserService userService) {
         this.accountService = accountService;
         this.transactionService = transactionService;
+        this.userService = userService;
     }
 
     @PostMapping
@@ -69,6 +73,12 @@ public class AccountController {
         return   ResponseEntity.ok("Account Deleted Successfully.");
     }
 
+    @DeleteMapping("/transaction/{id}")
+    public ResponseEntity<String> deleteTransactions(@PathVariable Long id){
+        transactionService.deleteTransactionsById(id);
+        return  ResponseEntity.ok("Transactions Deleted Successfully.");
+    }
+
     @GetMapping("/{id}/transactions")
     public ResponseEntity<List<Transaction>>getTransactions(@PathVariable Long id){
         List<Transaction>transaction = transactionService.getTransactions(id);
@@ -79,33 +89,40 @@ public class AccountController {
     public Map<String,List<Account>>getAllAccountsByName(){
         return accountService.getAllAccountsByName();
     }
-    @GetMapping("/multipleaccounts")
-    public Map<String,List<Account>>multipleAccounts(){
-        return accountService.multipleAccounts();
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDTO>> getAllUsers(){
+        List<UserDTO> users=userService.getAllusers();
+        return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/singleaccount")
-    public Map<String,List<Account>>singleAccounts(){
-        return  accountService.singleAccounts();
+    @PostMapping("/user")
+    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO){
+        return new ResponseEntity<>(userService.createUser(userDTO),HttpStatus.CREATED);
     }
 
-    @GetMapping("/multipleaccounts/transactions_Combined")
-    public Map<String,List<Transaction>> getTransactionsForMutlipleAccountsCombined(){
-        return  accountService.getTransactionsForMultipleAccountsCombined();
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<UserDTO>getUserById(@PathVariable Long userId){
+        UserDTO userDTO=userService.getUserById(userId);
+        return ResponseEntity.ok(userDTO);
     }
 
-    @GetMapping("/multipleaccounts/transactions_seperated")
-    public Map<String,Map<Long,List<Transaction>>> getTransactionsForMutlipleAccountsSeperately(){
-        return  accountService.getTransactionsForMultipleAccountsSeperately();
+    @GetMapping("/user/{userId}/transaction")
+    public ResponseEntity<Map<String,List<Transaction>>> transactionsByUserId(@PathVariable Long userId){
+        Map<String,List<Transaction>> result =transactionService.getTransactionsByUserId(userId);
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/multipleaccounts/{name}/transactionscombined")
-    public ResponseEntity< List<Transaction>> getTransactionsByNamecombined(@PathVariable String name){
-        return ResponseEntity.ok( accountService.getTransactionsByNameCombined(name));
+    @GetMapping("/user/{userId}/transaction/{id}")
+    public  ResponseEntity<Map<Long,List<Transaction>>> transactionsByUserIdAndAccouunt(@PathVariable Long userId,@PathVariable Long id){
+        Map<Long,List<Transaction>> result=transactionService.getTransactionsByUserAndAccountIds(userId,id);
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/multipleaccounts/{name}/transactionsseperately")
-    public ResponseEntity<Map<String,List<Transaction>>> getTransactionsByNameSeperately(@PathVariable String name){
-        return  ResponseEntity.ok( accountService.getTransactionsByNameSeperately(name));
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<String>deleteuser(@PathVariable Long userId){
+        userService.deleteUser(userId);
+        return ResponseEntity.ok("User Deleted Successfully.");
     }
+
 }
