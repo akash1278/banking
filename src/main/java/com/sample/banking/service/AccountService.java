@@ -27,6 +27,6 @@ public interface AccountService {
 
     Map<String, List<Account>> getAllAccountsByName();
 
-
+    Map<String,AccountDTO> transferAmount(Long fromAccountId,Long toAccountId,double amount);
 
 }

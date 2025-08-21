@@ -125,4 +125,11 @@ public class AccountController {
         return ResponseEntity.ok("User Deleted Successfully.");
     }
 
+    @PutMapping("/{fromAccountId}/transfer/{toAccountId}")
+    public ResponseEntity<Map<String,AccountDTO>> transfer(@PathVariable  Long fromAccountId,@PathVariable Long toAccountId,@RequestBody Map<String, Double> request){
+
+        double amount=request.get("amount");
+        Map<String,AccountDTO> result=accountService.transferAmount(fromAccountId,toAccountId,amount);
+        return ResponseEntity.ok(result);
+    }
 }

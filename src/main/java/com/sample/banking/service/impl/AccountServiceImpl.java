@@ -135,5 +135,44 @@ public class AccountServiceImpl implements AccountService  {
         return accountMap;
     }
 
+    @Override
+    public Map<String,AccountDTO> transferAmount(Long fromAccountId, Long toAccountId, double amount) {
+        if(fromAccountId.equals(toAccountId)){
+            throw new RuntimeException("amount Cannot Transfer to same account");
+        }
+        Account fromAccount=accountRepository.findById(fromAccountId).orElseThrow(()->new RuntimeException("Account doesn't exists"));
+        Account toAccount=accountRepository.findById(toAccountId).orElseThrow(() -> new RuntimeException("Account doesn't exists"));
+
+        if(fromAccount.getBalance()<amount){
+            throw new RuntimeException("amount is greater than balance. remaining balance: "+fromAccount.getBalance());
+        }
+
+        fromAccount.setBalance(fromAccount.getBalance()-amount);
+        toAccount.setBalance(toAccount.getBalance()+amount);
+
+       Account SavedfromAccount = accountRepository.save(fromAccount);
+       Account SavedtoAccount =  accountRepository.save(toAccount);
+
+        Transaction debit = new Transaction();
+        debit.setAccount(fromAccount);
+        debit.setAmount(-amount);
+        debit.setType("DEBIT");
+        debit.setLocalDateTime(LocalDateTime.now());
+        transactionRepository.save(debit);
+
+        Transaction credit = new Transaction();
+        credit.setAccount(toAccount);
+        credit.setAmount(+amount);
+        credit.setType("CREDIT");
+        credit.setLocalDateTime(LocalDateTime.now());
+        transactionRepository.save(credit);
+
+        Map<String,AccountDTO> result = new HashMap<>();
+        result.put("From Account:",AccountMapper.addToAccountDto(SavedfromAccount));
+        result.put("To Account: ",AccountMapper.addToAccountDto(SavedtoAccount));
+
+        return result;
+    }
+
 
 }
